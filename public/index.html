@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NovaFit – Track. Grow. Evolve.</title>
+  <meta name="description" content="NovaFit te ayuda a trackear tus entrenamientos, visualizar tu progreso y recibir recomendaciones inteligentes para superar tus límites." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#7c3aed" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+</head>
+<body>
+  <!-- Splash Screen -->
+  <div id="splash" class="splash">
+    <div class="splash-logo">
+      <div class="splash-icon">⚡</div>
+      <h1 class="splash-title">NovaFit</h1>
+      <p class="splash-sub">Track. Grow. Evolve.</p>
+    </div>
+    <div class="splash-bar"><div class="splash-fill"></div></div>
+  </div>
+
+  <!-- App Shell -->
+  <div id="app" class="app hidden">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <span class="brand-icon">⚡</span>
+        <span class="brand-name">NovaFit</span>
+      </div>
+      <nav class="sidebar-nav">
+        <button class="nav-item active" data-view="dashboard" id="nav-dashboard">
+          <span class="nav-icon">🏠</span><span class="nav-label">Dashboard</span>
+        </button>
+        <button class="nav-item" data-view="workout" id="nav-workout">
+          <span class="nav-icon">🏋️</span><span class="nav-label">Entrenar</span>
+        </button>
+        <button class="nav-item" data-view="history" id="nav-history">
+          <span class="nav-icon">📅</span><span class="nav-label">Historial</span>
+        </button>
+        <button class="nav-item" data-view="progress" id="nav-progress">
+          <span class="nav-icon">📈</span><span class="nav-label">Progreso</span>
+        </button>
+        <button class="nav-item" data-view="library" id="nav-library">
+          <span class="nav-icon">📚</span><span class="nav-label">Ejercicios</span>
+        </button>
+        <button class="nav-item" data-view="settings" id="nav-settings">
+          <span class="nav-icon">⚙️</span><span class="nav-label">Ajustes</span>
+        </button>
+      </nav>
+      <div class="sidebar-streak">
+        <div class="streak-badge">
+          <span class="streak-fire">🔥</span>
+          <div>
+            <div class="streak-num" id="sidebar-streak-num">0</div>
+            <div class="streak-label">días de racha</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Mobile top bar -->
+    <header class="topbar">
+      <div class="topbar-brand">⚡ NovaFit</div>
+      <div class="topbar-streak" id="topbar-streak">🔥 <span id="topbar-streak-num">0</span></div>
+    </header>
+
+    <!-- Mobile bottom tab bar -->
+    <nav class="bottombar" id="bottombar">
+      <button class="tab-item active" data-view="dashboard" id="tab-dashboard">
+        <span class="tab-icon">🏠</span><span class="tab-label">Inicio</span>
+      </button>
+      <button class="tab-item" data-view="workout" id="tab-workout">
+        <span class="tab-icon">🏋️</span><span class="tab-label">Entrenar</span>
+      </button>
+      <button class="tab-item" data-view="history" id="tab-history">
+        <span class="tab-icon">📅</span><span class="tab-label">Historial</span>
+      </button>
+      <button class="tab-item" data-view="progress" id="tab-progress">
+        <span class="tab-icon">📈</span><span class="tab-label">Progreso</span>
+      </button>
+      <button class="tab-item" id="tab-more">
+        <span class="tab-icon">☰</span><span class="tab-label">Más</span>
+      </button>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main" id="main">
+
+      <!-- ===== DASHBOARD ===== -->
+      <section class="view active" id="view-dashboard">
+        <div class="view-header">
+          <div>
+            <h2 class="view-title" id="greeting">¡Hola! 💪</h2>
+            <p class="view-sub">Aquí tienes tu resumen de hoy</p>
+          </div>
+          <button class="btn btn-primary btn-glow" id="start-workout-btn">+ Nuevo Entrenamiento</button>
+        </div>
+
+        <!-- Stats Row -->
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="stat-icon">🏋️</div>
+            <div class="stat-value" id="stat-total-workouts">0</div>
+            <div class="stat-label">Entrenamientos</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">⚖️</div>
+            <div class="stat-value" id="stat-total-volume">0 kg</div>
+            <div class="stat-label">Volumen total</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">🔥</div>
+            <div class="stat-value" id="stat-streak">0</div>
+            <div class="stat-label">Racha actual</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">🏆</div>
+            <div class="stat-value" id="stat-prs">0</div>
+            <div class="stat-label">PRs esta semana</div>
+          </div>
+        </div>
+
+        <!-- Recent + Recommendations -->
+        <div class="dashboard-grid">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Último entrenamiento</h3>
+              <span class="card-date" id="last-workout-date">—</span>
+            </div>
+            <div id="last-workout-content">
+              <div class="empty-state">
+                <div class="empty-icon">🏋️</div>
+                <p>Aún no tienes entrenamientos</p>
+                <button class="btn btn-secondary" id="empty-start-btn">Empezar ahora</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card recommendations-card">
+            <div class="card-header">
+              <h3 class="card-title">🤖 Recomendaciones IA</h3>
+              <span class="badge badge-ai">NOVA AI</span>
+            </div>
+            <div id="recommendations-list">
+              <div class="empty-state">
+                <div class="empty-icon">🤖</div>
+                <p>Haz al menos 2 entrenamientos para recibir recomendaciones</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Weekly Chart -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Volumen semanal</h3>
+          </div>
+          <div class="chart-wrap">
+            <canvas id="weekly-chart"></canvas>
+          </div>
+        </div>
+
+        <!-- Discipline System -->
+        <div class="card" id="discipline-card">
+          <div class="card-header" style="margin-bottom: 8px;">
+            <h3 class="card-title">🏆 Disciplina</h3>
+            <div class="discipline-score" id="discipline-score">100 <span style="font-size:12px;color:initial;">pts</span></div>
+          </div>
+          <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px;">
+            Planifica tus días. Si fallas, perderás puntos a menos que lo justifiques.
+          </p>
+          
+          <div class="week-planner" id="week-planner">
+            <button class="day-btn" data-day="1">L</button>
+            <button class="day-btn" data-day="2">M</button>
+            <button class="day-btn" data-day="3">X</button>
+            <button class="day-btn" data-day="4">J</button>
+            <button class="day-btn" data-day="5">V</button>
+            <button class="day-btn" data-day="6">S</button>
+            <button class="day-btn" data-day="0">D</button>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ===== WORKOUT ===== -->
+      <section class="view" id="view-workout">
+        <!-- Idle state -->
+        <div id="workout-idle">
+          <div class="view-header">
+            <div>
+              <h2 class="view-title">Entrenar</h2>
+              <p class="view-sub">¿Listo para superarte?</p>
+            </div>
+          </div>
+
+          <!-- Routine section -->
+          <div class="card-header" style="margin-top: 24px; padding: 0 4px;">
+            <h3 class="card-title">Mis Rutinas</h3>
+            <button class="btn btn-ghost" id="create-routine-btn">+ Nueva</button>
+          </div>
+          <div class="template-grid" id="routine-grid">
+            <!-- Routines will be rendered here -->
+          </div>
+
+          <div class="card-header" style="margin-top: 24px; padding: 0 4px;">
+            <h3 class="card-title">Plantillas rápidas</h3>
+          </div>
+          <div class="template-grid" id="template-grid">
+            <div class="template-card" data-template="fullbody">
+              <div class="template-emoji">💪</div>
+              <div class="template-name">Full Body</div>
+              <div class="template-info">6 ejercicios</div>
+            </div>
+            <div class="template-card" data-template="push">
+              <div class="template-emoji">🔼</div>
+              <div class="template-name">Push (Empuje)</div>
+              <div class="template-info">5 ejercicios</div>
+            </div>
+            <div class="template-card" data-template="pull">
+              <div class="template-emoji">🔽</div>
+              <div class="template-name">Pull (Tirón)</div>
+              <div class="template-info">5 ejercicios</div>
+            </div>
+            <div class="template-card" data-template="legs">
+              <div class="template-emoji">🦵</div>
+              <div class="template-name">Legs (Piernas)</div>
+              <div class="template-info">5 ejercicios</div>
+            </div>
+            <div class="template-card" data-template="custom">
+              <div class="template-emoji">✏️</div>
+              <div class="template-name">En blanco</div>
+              <div class="template-info">Personalizado</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Active workout state -->
+        <div id="workout-active" class="hidden">
+          <div class="workout-header">
+            <div class="workout-meta">
+              <input type="text" id="workout-name" class="workout-name-input" placeholder="Nombre del entrenamiento" value="Mi Entrenamiento" />
+              <div class="workout-timer-wrap">
+                <span class="timer-icon">⏱</span>
+                <span id="workout-timer" class="workout-timer">00:00</span>
+              </div>
+            </div>
+            <!-- Rest Timer Overlay (Floating) -->
+            <div id="rest-timer-overlay" class="rest-timer-overlay hidden">
+              <div class="rest-timer-circle">
+                <svg viewBox="0 0 100 100">
+                  <circle cx="50" cy="50" r="45" class="rest-timer-bg" />
+                  <circle cx="50" cy="50" r="45" class="rest-timer-progress" id="rest-timer-progress-svg" />
+                </svg>
+                <div class="rest-timer-content">
+                  <span id="rest-timer-countdown">60</span>
+                  <span class="rest-timer-label">descanso</span>
+                </div>
+              </div>
+              <div class="rest-timer-actions">
+                <button class="btn btn-ghost" id="skip-rest-btn">Omitir</button>
+                <button class="btn btn-ghost" id="add-rest-btn">+30s</button>
+              </div>
+            </div>
+            <div class="workout-actions">
+              <button class="btn btn-ghost" id="cancel-workout-btn">Cancelar</button>
+              <button class="btn btn-success btn-glow" id="finish-workout-btn">Finalizar ✓</button>
+            </div>
+          </div>
+
+          <!-- Exercise list -->
+          <div id="exercise-list" class="exercise-list"></div>
+
+          <!-- Add exercise -->
+          <button class="btn btn-outline btn-full" id="add-exercise-btn">+ Agregar ejercicio</button>
+        </div>
+      </section>
+
+      <!-- ===== HISTORY ===== -->
+      <section class="view" id="view-history">
+        <div class="view-header">
+          <div>
+            <h2 class="view-title">Historial</h2>
+            <p class="view-sub">Todos tus entrenamientos</p>
+          </div>
+        </div>
+        <div id="history-list" class="history-list">
+          <div class="empty-state">
+            <div class="empty-icon">📅</div>
+            <p>Aún no tienes entrenamientos guardados</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== PROGRESS ===== -->
+      <section class="view" id="view-progress">
+        <div class="view-header">
+          <div>
+            <h2 class="view-title">Progreso</h2>
+            <p class="view-sub">Visualiza tu evolución</p>
+          </div>
+        </div>
+
+        <div class="progress-controls">
+          <select id="progress-exercise-select" class="select-input">
+            <option value="">— Selecciona un ejercicio —</option>
+          </select>
+          <div class="period-tabs">
+            <button class="period-tab active" data-period="month">1M</button>
+            <button class="period-tab" data-period="3months">3M</button>
+            <button class="period-tab" data-period="all">Todo</button>
+          </div>
+        </div>
+        
+        <!-- Body Map Visualization -->
+        <div class="card" id="body-map-card" style="margin-bottom: 24px;">
+          <div class="card-header">
+            <h3 class="card-title">🧍 Mapa Muscular Anatomico</h3>
+            <span class="badge badge-ai">Visualización 3D</span>
+          </div>
+          <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px;">Distribución de carga por grupo muscular (periodo actual).</p>
+          <div class="body-map-container" id="body-map-svg-container">
+            <!-- SVG Body map will be injected here -->
+            <div class="body-map-loading">Cargando mapa anatómico...</div>
+          </div>
+          <div class="body-map-legend">
+            <span class="legend-item"><span class="dot" style="background:#2a2a3e"></span> Descanso</span>
+            <span class="legend-item"><span class="dot" style="background:#06b6d4"></span> Mínimo</span>
+            <span class="legend-item"><span class="dot" style="background:#10b981"></span> Óptimo</span>
+            <span class="legend-item"><span class="dot" style="background:#f59e0b"></span> Alto</span>
+            <span class="legend-item"><span class="dot" style="background:#ef4444"></span> Fatiga</span>
+          </div>
+        </div>
+
+        <div class="card" id="muscle-heatmap-card" style="margin-bottom: 24px;">
+          <div class="card-header">
+            <h3 class="card-title">📊 Desglose por Volumen</h3>
+          </div>
+          <div class="chart-wrap" style="height: 280px;">
+            <canvas id="heatmap-chart"></canvas>
+          </div>
+        </div>
+
+        <div class="progress-charts-grid">
+          <div class="card">
+            <div class="card-header"><h3 class="card-title">1RM Estimado (kg)</h3></div>
+            <div class="chart-wrap"><canvas id="orm-chart"></canvas></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><h3 class="card-title">Máximo peso (kg)</h3></div>
+            <div class="chart-wrap"><canvas id="maxweight-chart"></canvas></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><h3 class="card-title">Volumen total (kg)</h3></div>
+            <div class="chart-wrap"><canvas id="volume-chart"></canvas></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><h3 class="card-title">Máximas repeticiones</h3></div>
+            <div class="chart-wrap"><canvas id="maxreps-chart"></canvas></div>
+          </div>
+        </div>
+
+        <div id="progress-empty" class="empty-state card" style="display:none">
+          <div class="empty-icon">📈</div>
+          <p>Selecciona un ejercicio para ver su progreso</p>
+        </div>
+
+        <!-- PRs section -->
+        <div class="card" id="prs-card">
+          <div class="card-header"><h3 class="card-title">🏆 Records Personales</h3></div>
+          <div id="prs-list"></div>
+        </div>
+      </section>
+
+      <!-- ===== EXERCISE LIBRARY ===== -->
+      <section class="view" id="view-library">
+        <div class="view-header">
+          <div>
+            <h2 class="view-title">Biblioteca</h2>
+            <p class="view-sub">Catálogo de ejercicios</p>
+          </div>
+          <button class="btn btn-primary" id="add-custom-exercise-btn">+ Nuevo</button>
+        </div>
+        <div class="library-filters">
+          <input type="search" id="library-search" class="search-input" placeholder="🔍 Buscar ejercicio..." />
+          <div class="muscle-filters" id="muscle-filters">
+            <button class="filter-chip active" data-muscle="all">Todos</button>
+            <button class="filter-chip" data-muscle="chest">Pecho</button>
+            <button class="filter-chip" data-muscle="back">Espalda</button>
+            <button class="filter-chip" data-muscle="shoulders">Hombros</button>
+            <button class="filter-chip" data-muscle="biceps">Bíceps</button>
+            <button class="filter-chip" data-muscle="triceps">Tríceps</button>
+            <button class="filter-chip" data-muscle="legs">Piernas</button>
+            <button class="filter-chip" data-muscle="glutes">Glúteos</button>
+            <button class="filter-chip" data-muscle="core">Core</button>
+          </div>
+        </div>
+        <div id="library-grid" class="library-grid"></div>
+      </section>
+
+      <!-- ===== SETTINGS & DATA ===== -->
+      <section class="view" id="view-settings">
+        <div class="view-header">
+          <div>
+            <h2 class="view-title">Ajustes y Datos</h2>
+            <p class="view-sub">Gestiona tu información</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">⏱ Temporizador de Descanso</h3>
+          </div>
+          <p style="font-size: 14px; color: var(--text-secondary); margin-bottom: 16px;">
+            Tiempo de descanso automático tras completar cada serie durante el entrenamiento.
+          </p>
+          <div class="form-group">
+            <label class="form-label">Tiempo por defecto (segundos)</label>
+            <div class="rest-presets">
+              <button class="preset-btn" data-rest="30">30s</button>
+              <button class="preset-btn" data-rest="60">60s</button>
+              <button class="preset-btn active" data-rest="90">90s</button>
+              <button class="preset-btn" data-rest="120">120s</button>
+              <button class="preset-btn" data-rest="180">3m</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">📥 Importar desde Hevy (CSV)</h3>
+          </div>
+          <p style="font-size: 14px; color: var(--text-secondary); margin-bottom: 16px;">
+            Sube el archivo CSV exportado desde Hevy. Tus entrenamientos se añadirán al historial de NovaFit.
+            Si hay ejercicios que no existen en NovaFit, se añadirán automáticamente como ejercicios personalizados.
+          </p>
+          <div class="form-group">
+            <input type="file" id="hevy-csv-input" accept=".csv" class="form-input" style="padding: 12px; border: 2px dashed var(--border);" />
+          </div>
+          <button class="btn btn-primary" id="import-hevy-btn" disabled>Importar Datos</button>
+          
+          <div id="import-status" style="margin-top: 14px; font-size: 13px; font-weight: 600; display: none;"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">📤 Exportar Datos</h3>
+          </div>
+          <p style="font-size: 14px; color: var(--text-secondary); margin-bottom: 16px;">
+            Exporta tus entrenamientos a un archivo CSV para guardar una copia de seguridad o usarlos en otra aplicación.
+          </p>
+          <button class="btn btn-secondary" id="export-csv-btn">Exportar a CSV</button>
+        </div>
+
+        <div class="card" style="border-color: rgba(239,68,68,0.3);">
+          <div class="card-header">
+            <h3 class="card-title" style="color: var(--danger)">⚠️ Zona de Peligro</h3>
+          </div>
+          <p style="font-size: 14px; color: var(--text-secondary); margin-bottom: 16px;">
+            Borrar todos los datos eliminará tu historial, ejercicios personalizados y preferencias. Esta acción no se puede deshacer.
+          </p>
+          <button class="btn btn-danger" id="wipe-data-btn">Borrar todos los datos</button>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ===== MODALS ===== -->
+
+  <!-- Exercise Picker Modal -->
+  <div class="modal-backdrop hidden" id="exercise-picker-backdrop">
+    <div class="modal" id="exercise-picker-modal">
+      <div class="modal-header">
+        <h3>Seleccionar Ejercicio</h3>
+        <button class="modal-close" id="close-exercise-picker">✕</button>
+      </div>
+      <input type="search" id="picker-search" class="search-input" placeholder="🔍 Buscar..." />
+      <div class="picker-categories" id="picker-categories"></div>
+      <div id="picker-list" class="picker-list"></div>
+    </div>
+  </div>
+
+  <!-- Workout Detail Modal -->
+  <div class="modal-backdrop hidden" id="workout-detail-backdrop">
+    <div class="modal modal-lg" id="workout-detail-modal">
+      <div class="modal-header">
+        <h3 id="workout-detail-title">Entrenamiento</h3>
+        <button class="modal-close" id="close-workout-detail">✕</button>
+      </div>
+      <div id="workout-detail-content"></div>
+    </div>
+  </div>
+
+  <!-- Add Custom Exercise Modal -->
+  <div class="modal-backdrop hidden" id="custom-exercise-backdrop">
+    <div class="modal" id="custom-exercise-modal">
+      <div class="modal-header">
+        <h3>Nuevo Ejercicio</h3>
+        <button class="modal-close" id="close-custom-exercise">✕</button>
+      </div>
+      <div id="exercise-form">
+        <div class="form-group">
+          <label class="form-label">Nombre</label>
+          <input type="text" id="custom-ex-name" class="form-input" placeholder="Ej: Press Banca con mancuernas" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Músculo principal</label>
+          <select id="custom-ex-muscle" class="select-input">
+            <option value="chest">Pecho</option>
+            <option value="back">Espalda</option>
+            <option value="shoulders">Hombros</option>
+            <option value="biceps">Bíceps</option>
+            <option value="triceps">Tríceps</option>
+            <option value="legs">Piernas</option>
+            <option value="glutes">Glúteos</option>
+            <option value="core">Core</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Equipo</label>
+          <select id="custom-ex-equipment" class="select-input">
+            <option value="barbell">Barra</option>
+            <option value="dumbbell">Mancuernas</option>
+            <option value="machine">Máquina</option>
+            <option value="cables">Cables</option>
+            <option value="bodyweight">Peso corporal</option>
+            <option value="other">Otro</option>
+          </select>
+        </div>
+        <button class="btn btn-primary btn-full" id="save-custom-exercise-btn">Guardar ejercicio</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Routine Editor Modal -->
+  <div class="modal-backdrop hidden" id="routine-editor-backdrop">
+    <div class="modal" id="routine-editor-modal">
+      <div class="modal-header">
+        <h3 id="routine-editor-title">Editar Rutina</h3>
+        <button class="modal-close" id="close-routine-editor">✕</button>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Nombre de la Rutina</label>
+        <input type="text" id="routine-name-input" class="form-input" placeholder="Ej: Pecho y Tríceps" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Ejercicios</label>
+        <div id="routine-exercise-list" class="routine-exercise-list"></div>
+        <button class="btn btn-ghost btn-full" id="routine-add-ex-btn" style="margin-top:10px">+ Añadir ejercicio</button>
+      </div>
+      <div class="modal-footer" style="margin-top:20px; display:flex; gap:10px;">
+        <button class="btn btn-danger" id="delete-routine-btn">Eliminar</button>
+        <button class="btn btn-success btn-full" id="save-routine-btn">Guardar Rutina</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Discipline Justification Modal -->
+  <div class="modal-backdrop hidden" id="discipline-modal-backdrop" style="z-index: 999; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px);">
+    <div class="modal" id="discipline-modal" style="border: 1px solid var(--danger); box-shadow: 0 0 40px rgba(239,68,68,0.2);">
+      <div class="modal-header">
+        <h3 style="color: var(--danger);">🚨 Alerta de Disciplina</h3>
+      </div>
+      <p style="font-size: 15px; margin-bottom: 8px;">Ayer tenías planificado entrenar y no hay registro.</p>
+      <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 20px;">
+        Perderás <strong style="color:var(--danger)">-15 pts</strong> de disciplina a menos que lo justifiques o lo canjees por un entreno hoy.
+      </p>
+      
+      <div class="form-group">
+        <label class="form-label">¿Qué ha pasado?</label>
+        <select id="discipline-reason" class="select-input" style="width: 100%;">
+          <option value="none">Sin excusa (asumir penalización)</option>
+          <option value="sick">Enfermedad / Lesión (justificado)</option>
+          <option value="work">Trabajo / Imprevisto grave (justificado)</option>
+          <option value="swap">Canjear: Entrenaré HOY en su lugar</option>
+        </select>
+      </div>
+      <button class="btn btn-primary btn-full" id="submit-discipline-btn">Confirmar</button>
+    </div>
+  </div>
+
+  <script src="bodymap.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

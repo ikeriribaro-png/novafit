@@ -1,0 +1,9 @@
+node_modules/
+.DS_Store
+*.db
+*.db-journal
+*.log
+.env
+public/icon-*.png
+!public/icon-192.png
+!public/icon-512.png
